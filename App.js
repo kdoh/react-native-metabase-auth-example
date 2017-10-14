@@ -1,8 +1,6 @@
 import React from 'react';
 import {
     ActivityIndicator,
-    AsyncStorage,
-    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
@@ -11,37 +9,21 @@ import {
 
 import { Router, Scene, Actions } from 'react-native-router-flux'
 
+import Metabase from './metabase'
+
 class Auth extends React.Component {
     state = {
         username: undefined,
         password: undefined,
         metabaseUrl: undefined
     }
-    login = () => {
-        const { username, password, metabaseUrl } = this.state
-        fetch(`https://${metabaseUrl}/api/session`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username,
-                password
-            })
-        })
-        .then(response => response.json())
-        .then(response => {
-            console.log(response)
-            this.storeMetabaseSessionToken(response.id)
+    login = async () => {
+        const login = await Metabase.login(this.state)
+        if(login) {
+          console.log('Metabase Session Token:', login)
             Actions.Home()
-        })
-    }
-    async storeMetabaseSessionToken (token) {
-        try {
-            await AsyncStorage.setItem('metabaseSessionToken', token)
-        } catch (error) {
-            console.error(error)
+        } else {
+            console.error('Login failure')
         }
     }
     render () {
@@ -79,22 +61,11 @@ class Auth extends React.Component {
     }
 }
 
-function metabaseRequest (url) {
-    
-}
-
-const fetchSessionTokenFromStorage = async () => {
-    const token = await AsyncStorage.getItem('metabaseSessionToken').then(token => {
-        return token
-    })
-    return token
-}
-
 
 class Home extends React.Component {
     async logout () {
         try {
-            await AsyncStorage.removeItem('metabaseSessionToken')
+            await Metabase.logout()
             Actions.Auth()
         } catch (error) {
             console.error(error)
@@ -120,7 +91,8 @@ export default class App extends React.Component {
       isLoaded: false
   }
   async componentDidMount () {
-      const token = await fetchSessionTokenFromStorage()
+      const token = await Metabase.fetchSessionTokenFromStorage()
+      console.log('Metabase Session Token:', token)
       this.setState({
           hasSession: token !== null,
           isLoaded: true
@@ -152,11 +124,3 @@ export default class App extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
