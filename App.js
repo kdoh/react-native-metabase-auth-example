@@ -15,15 +15,16 @@ class Auth extends React.Component {
     state = {
         username: undefined,
         password: undefined,
-        metabaseUrl: undefined
+        metabaseUrl: undefined,
+        error: null
     }
     login = async () => {
-        const login = await Metabase.login(this.state)
-        if(login) {
-            console.log('Metabase Session Token:', login)
+        try {
+            await Metabase.login(this.state)
             Actions.Home()
-        } else {
-            console.error('Login failure')
+        } catch (error) {
+            console.error('Login failure', error)
+            this.setState({ error })
         }
     }
     render () {
@@ -68,19 +69,27 @@ class UserInfo extends React.Component {
     async componentDidMount () {
         try {
             const user = await Metabase.request('user/current')
-            this.setState({user})
+            const metrics = await Metabase.request('metric')
+            this.setState({
+                user,
+                metrics
+            })
         } catch (error) {
             console.error(error)
         }
     }
     render () {
-        if(!this.state.user) {
+        const { user, metrics } = this.state
+        if(!user) {
             return <ActivityIndicator />
         } else {
             return (
                 <View>
-                    <Text>{this.state.user.first_name}</Text>
-                    <Text>{this.state.user.last_name}</Text>
+                    <Text>Hey there {user.first_name}</Text>
+                    <Text>Metrics</Text>
+                    { metrics.map(metric => 
+                        <Text key={metric.id}>{metric.name}</Text>
+                    )}
                 </View>
             )
         }
@@ -99,11 +108,10 @@ class Home extends React.Component {
     render () {
         return (
             <View>
-                <Text>You are logged in</Text>
-                <UserInfo />
                 <TouchableOpacity onPress={this.logout}>
                     <Text>Logout</Text>
                 </TouchableOpacity>
+                <UserInfo />
             </View>
         )
     }
