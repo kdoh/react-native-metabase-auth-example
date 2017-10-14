@@ -4528,6 +4528,10 @@ react-native-maps@0.15.3:
   version "0.15.3"
   resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-0.15.3.tgz#5d9e0a8e30ecc51dc755b7a3b9d6b6ed5e2dd08c"
 
+react-native-metabase-auth@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-metabase-auth/-/react-native-metabase-auth-0.1.0.tgz#d0cfdd50f188b0642b1eae86fd630f33619edbce"
+
 react-native-router-flux@^4.0.0-beta.22:
   version "4.0.0-beta.22"
   resolved "https://registry.yarnpkg.com/react-native-router-flux/-/react-native-router-flux-4.0.0-beta.22.tgz#d2314d9b947ca23a10302737ae5ddd9218f086c3"

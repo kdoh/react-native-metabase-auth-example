@@ -9,7 +9,7 @@ import {
 
 import { Router, Scene, Actions } from 'react-native-router-flux'
 
-import Metabase from './metabase'
+import Metabase from 'react-native-metabase-auth'
 
 class Auth extends React.Component {
     state = {
