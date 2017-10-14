@@ -1,5 +1,5 @@
 {
-  "name": "metabase-react-native-wrapper",
+  "name": "react-native-metabase-auth-example",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
