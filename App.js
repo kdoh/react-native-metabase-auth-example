@@ -20,7 +20,7 @@ class Auth extends React.Component {
     login = async () => {
         const login = await Metabase.login(this.state)
         if(login) {
-          console.log('Metabase Session Token:', login)
+            console.log('Metabase Session Token:', login)
             Actions.Home()
         } else {
             console.error('Login failure')
@@ -61,6 +61,31 @@ class Auth extends React.Component {
     }
 }
 
+class UserInfo extends React.Component {
+    state = {
+        user: undefined
+    }
+    async componentDidMount () {
+        try {
+            const user = await Metabase.request('user/current')
+            this.setState({user})
+        } catch (error) {
+            console.error(error)
+        }
+    }
+    render () {
+        if(!this.state.user) {
+            return <ActivityIndicator />
+        } else {
+            return (
+                <View>
+                    <Text>{this.state.user.first_name}</Text>
+                    <Text>{this.state.user.last_name}</Text>
+                </View>
+            )
+        }
+    }
+}
 
 class Home extends React.Component {
     async logout () {
@@ -71,12 +96,11 @@ class Home extends React.Component {
             console.error(error)
         }
     }
-    componentDidMount () {
-    }
     render () {
         return (
             <View>
                 <Text>You are logged in</Text>
+                <UserInfo />
                 <TouchableOpacity onPress={this.logout}>
                     <Text>Logout</Text>
                 </TouchableOpacity>

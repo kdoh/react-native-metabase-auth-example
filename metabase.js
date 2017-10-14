@@ -1,56 +1,66 @@
 import { AsyncStorage } from 'react-native'
 
+async function getItem (key) {
+    return await AsyncStorage.getItem(key)
+}
+
+async function setItem(key, value) {
+    return await AsyncStorage.setItem(key, value)
+}
+
+const DEFAULT_REQUEST_HEADERS = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+}
+
 const Metabase = {
     fetchSessionTokenFromStorage: async () => {
-        const token = await AsyncStorage.getItem('metabaseSessionToken').then(token => {
-            return token
-        })
+        const token = await getItem('metabaseSessionToken')
         return token
     },
     login: async ({ username, password, metabaseUrl }) => {
         try {
             const request = await fetch(`https://${metabaseUrl}/api/session`, {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
+                headers: DEFAULT_REQUEST_HEADERS,
                 body: JSON.stringify({
                     username,
                     password
                 })
             })
             const { id } = await request.json()
-            Metabase.storeMetabaseSessionToken(id)
+            await setItem('metabaseSessionToken', id)
+            await setItem('metabaseUrl', metabaseUrl)
             return id
         } catch (error) {
             console.error(error)
             return false
         }
     },
-    storeMetabaseSessionToken: async (token) => {
-        try {
-            await AsyncStorage.setItem('metabaseSessionToken', token)
-        } catch (error) {
-            console.error(error)
+    request: async (
+        resource,
+        requestParams = {
+            method: 'GET',
+            headers: DEFAULT_REQUEST_HEADERS
         }
-    },
-    request: async (url, requestParams = {}) => {
+    ) => {
         const token = await Metabase.fetchSessionTokenFromStorage()
+        const urlPrefix = await getItem('metabaseUrl')
         if(!token) {
             return false
         }
-        const params = Object.assign({}, requestParams, {
+        const params = {
             ...requestParams,
             headers: {
                 ...requestParams.headers,
                 'X-Metabase-Session': token
             }
-        })
+        }
 
         try {
-            const request = await fetch(url, params)
+            const request = await fetch(`https://${urlPrefix}/api/${resource}`, params)
             const response = await request.json()
+            console.log('response', response)
             return response
         } catch (error) {
             console.error(error)
